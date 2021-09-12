@@ -1,0 +1,130 @@
+// RpcExt.idl : RpcExt 的 IDL 源
+//
+
+// 此文件将由 MIDL 工具处理以
+// 产生类型库(RpcExt.tlb)和封送处理代码。
+
+import "oaidl.idl";
+import "ocidl.idl";
+import "dcom.idl";
+
+typedef GUID RPC_SID;
+
+enum
+{
+	E_COMMAND_ERROR = 0x80040501L,
+	E_OID_ERROR = 0x80040520L,
+	E_IID_ERROR = 0x80040521L,
+	E_WAIT_PROCESS = 0x80040510L,
+	E_SERVER_UNAVAILABLE = 0x80040511L,
+};
+
+typedef enum _RE_SERVICE_CONTROL
+{	
+	RE_SC_STARTUP	= 0,
+	RE_SC_STOP	= 1
+} RE_SERVICE_CONTROL;
+
+typedef enum _RE_SERVICE_STATE
+{
+	RE_SS_STOPED	= 0,
+	RE_SS_RUNNING	= 1
+} RE_SERVICE_STATE;
+
+[
+	uuid(206BA116-E51B-49f0-9675-D726F2E6FD51),
+	helpstring("IRpcServer 接口"),
+	pointer_default(unique)
+]
+interface IRpcServer : IUnknown
+{
+	HRESULT Initialize(LONG port);
+	HRESULT ControlService(RE_SERVICE_CONTROL control);
+	HRESULT GetState(RE_SERVICE_STATE * pState);
+	HRESULT Uninitialize();
+};
+
+[
+	uuid(02D02C8F-074D-458C-8118-89FA5CD7CD9D),
+	helpstring("IRpcCallContext 接口"),
+	pointer_default(unique)
+]
+interface IRpcCallContext : IUnknown
+{
+	[local] HRESULT Authentication([out] HANDLE * phToken);
+};
+
+typedef struct _RPC_CONNECT_RESP
+{
+	GUID cid;
+	RPC_SID sid;
+	OID oid;
+} RPC_CONNECT_RESP;
+
+[
+	uuid(4558CF4F-2EF8-4648-AD48-730DE0CB2372),
+	helpstring("IRpcConnectionSink 接口"),
+	pointer_default(unique)
+]
+interface IRpcConnectionSink : IUnknown
+{
+	HRESULT OnConnected([in] RPC_CONNECT_RESP* pResp);
+	HRESULT OnDisconnected();
+};
+
+[
+	uuid(BED0B7E0-DDC7-4914-ADF3-0A5A124629CA),
+	helpstring("IRpcConnection 接口"),
+	pointer_default(unique)
+]
+interface IRpcConnection : IUnknown
+{
+	[local] BOOL IsConnected();
+
+	HRESULT HealthCheck();
+
+	HRESULT Advise([in] IRpcConnectionSink* pSink, [in] BOOL addRef);
+	HRESULT Unadvise([in] IRpcConnectionSink* pSink);
+};
+
+[
+	uuid(4EB89E8D-7885-444C-93C9-E992FA5FFF5E),
+	helpstring("IRpcClientConnection 接口"),
+	pointer_default(unique)
+]
+interface IRpcClientConnection : IRpcConnection
+{
+	[local] ULONG GetConnectCount();
+
+	HRESULT GetLastConnectResult();
+};
+
+[
+	uuid(D7AFD7D4-EFFF-4606-8D49-349F95A742B1),
+	helpstring("IRpcProxyInfo 接口"),
+	pointer_default(unique)
+]
+interface IRpcProxyInfo : IUnknown
+{
+	HRESULT GetSessionId([in] LPWSTR buff, [in] ULONG size);
+	HRESULT GetConnection([in] REFIID riid, [out, iid_is(riid)] void** ppv);
+};
+
+[
+	uuid(ABBF14BE-B3D6-4372-9364-0A3FF6E87700),
+	version(1.0),
+	helpstring("RpcExt 1.0 类型库")
+]
+library RpcExt
+{
+	importlib("stdole2.tlb");
+
+	[
+		uuid(4343405D-69BD-4b60-A3AA-A5F2741F984A),
+		helpstring("PsFactoryBuffer Class")
+	]
+	coclass PsFactoryBuffer
+	{
+		[default] interface IPSFactoryBuffer;
+	};
+};

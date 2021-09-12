@@ -1,0 +1,36 @@
+// Server.idl : IDL source for Server
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (Server.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(81331af6-e61d-405b-bc7b-81c03843b49b),
+	pointer_default(unique)
+]
+interface IUserService : IUnknown
+{
+	HRESULT Hello([in] LPCWSTR name, [out] BSTR* pResult);
+};
+
+[
+	uuid(d56bdf05-fd5d-4b69-bb60-54cd8d7c4df6),
+	version(1.0),
+]
+library Server
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(538426ce-d0c0-4082-baca-75e24f781840)
+	]
+	coclass UserService
+	{
+		[default] interface IUserService;
+	};
+};
+
+import "shobjidl.idl";
